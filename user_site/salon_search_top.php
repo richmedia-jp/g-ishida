@@ -1,7 +1,25 @@
 <?php
   require('header.php');
-?>
 
+$dsn = 'mysql:dbname=mydb;host=127.0.0.1';
+$user = 'root';
+$pswd = '211293g2';
+$options = array(
+  PDO::MYSQL_ATTR_READ_DEFAULT_FILE => '/etc/my.cnf',
+); 
+
+try{
+  $dbh = new PDO($dsn, $user, $pswd, $options);
+  $sql_t = "SELECT * FROM Tag WHERE Tag_ID >= 2 AND Tag_ID <= 6";
+  $stmt_t = $dbh->query($sql_t);
+
+}catch (PDOException $e){
+  print('Error:'.$e->getMessage());
+  die();
+}
+$dbh = null;
+     
+?>
 
 <div id="container">
   <div id="contents">
@@ -87,16 +105,33 @@
 
     <div id="basic_search">
       <form action="salon_search_result.php" method="post">
+    
+      <div id="ward_search">
+          <table>
+            <tr><td>エリア</td><td>キーワード</td><td></td></tr>
+            <tr>
+              <td><input type="text" name="area" value="<?php echo $_POST['area']?>" size="10"></td>
+              <td><input type="text" name="keyword" value="<?php echo $_POST['keyword']?>" size="40"></td>
+              <td><input type="submit" value="検索"</td>
+            </tr>
+          </table>
+      </div>
+    
+      <div id="tag_search">
         <table>
-          <tr><td>エリア</td><td>キーワード</td><td></td></tr>
-          <tr>
-            <td><input type="text" name="area" value="<?php echo $_POST['area']?>" size="10"></td>
-            <td><input type="text" name="keyword" value="<?php echo $_POST['keyword']?>" size="40"></td>
-            <td><input type="submit" value="検索"</td>
-          </tr>
+        <?php
+         while($result_t = $stmt_t->fetch(PDO::FETCH_ASSOC)){
+            echo '          <tr><td><img src="../get_tag_img.php?id='.$result_t['Tag_ID'].'"/></td> <td>'.$result_t['Tag_name'].'</td> <td><input type ="checkbox" name="tag[]" value="'.$result_t['Tag_ID'].'" class="check_form"></td> </tr>'."\n";
+
+          }
+         
+        ?>
         </table>
+      </div>
+
       </form>
     </div>
+
 
     <div id="bottom_contents">
       <p>オススメ美容室</p>
