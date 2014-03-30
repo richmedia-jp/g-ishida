@@ -121,7 +121,7 @@ try{
         echo "          </div>\n";
         echo "        </div>\n";
       }
-      if($result==null){//検索した結果、該当データがなかったとき(↑のwhileに入らない時)
+      if(count($result)==null){//検索した結果、該当データがなかったとき//この条件はよくなさそう。
         echo '<p>該当する美容室はありませんでした。エリア、キーワードを変えて検索してみてください</p><br>';
       }
     }
@@ -133,8 +133,7 @@ try{
   print('Error:'.$e->getMessage());
   die();
 }
-
-  $dbh = null;
+$dbh = null;
 
 ?>
 
