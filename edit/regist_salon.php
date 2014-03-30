@@ -10,8 +10,12 @@ $options = array(
 
 try{
   $dbh = new PDO($dsn, $user, $pswd, $options);
-  $sql = "SELECT * FROM Prefecture";
+  $sql = "SELECT * FROM Prefecture";// 都道府県のプルダウンメニューを作成するのに使用
   $stmt = $dbh->query($sql);
+
+  $sql_t = "SELECT * FROM Tag WHERE (Tag_ID = 2) OR (Tag_ID = 3) OR (Tag_ID = 4) OR (Tag_ID = 5) OR (Tag_ID = 6)";
+  $stmt_t = $dbh->query($sql_t);
+
 }catch (PDOException $e){
   print('Error:'.$e->getMessage());
   die();
@@ -25,8 +29,11 @@ $dbh = null;
 <div id="container">
 
   <div id="input_info">
-    <p class="new_regist">新規登録</p>
-    <form action="sql_regist_salon.php" method="post"> 
+    <p class="edit_caption">美容室 新規登録</p>
+    <form method="POST" enctype="multipart/form-data" action="sql_regist_salon.php"> 
+
+      <input type="hidden" name="MAX_FILE_SIZE" value="100000"><!--65536">-->
+
       <table>
         <tr>
           <td>美容室名</td> <td><input type="text" name="Salon_name" size="30" class="input_form"></td>
@@ -66,6 +73,7 @@ $dbh = null;
           <td>定休日</td>
         </tr>
       </table>
+
       <table class="holiday">
         <tr>
           <td>月</td><td><input type="checkbox" name="holiday[]" value="MON" class="check_holiday"></td>
@@ -79,6 +87,7 @@ $dbh = null;
           <td>日</td><td><input type="checkbox" name="holiday[]" value="SUN" class="check_from"></td>
         </tr>
       </table>
+
       <table>
         <tr>
           <td>紹介文タイトル</td> <td><input type="text" name="Introduction_title" size="60" class="input_form"></td>
@@ -88,12 +97,36 @@ $dbh = null;
         </tr>
         <tr>
           <td>おすすめフラッグ</td> <td><input type="checkbox" name="Recommend_flag" value="on" class="input_form"></td>
+        </tr>   
+      </table> 
+      
+      <table class="tag_table">
+<?php
+        while($result_t = $stmt_t->fetch(PDO::FETCH_ASSOC)){
+          echo '      <tr><td><img src="get_tag_img.php?id='.$result_t['Tag_ID'].'"/></td> <td>'.$result_t['Tag_name'].'</td> <td><input type ="checkbox" name="tag[]" value="'.$result_t['Tag_ID'].'" class="check_form"></td> </tr>'."\n";
+        }
+?>
+      </table>   
+      
+      <table>
+        <tr>
+          <td>画像のファイルを選択してください</td>
+          <td><input type="file" size="50" name="upfile1"></td><!-- ファイル選択ボタン -->
         </tr>
-       
-      </table>    
+        <tr>
+          <td>画像のファイルを選択してください</td>
+          <td><input type="file" size="50" name="upfile2"></td><!-- ファイル選択ボタン -->
+        </tr>
+        <tr>
+          <td>画像のファイルを選択してください</td>
+          <td><input type="file" size="50" name="upfile3"></td><!-- ファイル選択ボタン -->
+        </tr>
+     </table>
+ 
+
 
       <!-- あと画像のアップロードと公開・非公開設定のチェックボックスを入れる  -->
-    
+      <input type="reset" name="reset" value="リセット">  
       <input type="submit" value="新規登録" class="input_form_button">
     </form>
 
@@ -104,3 +137,6 @@ $dbh = null;
 </div>
 
 <?php require("footer.php"); ?>
+
+
+
