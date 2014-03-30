@@ -39,6 +39,7 @@ try{
     else {
       $result_h = $stmt_h->fetch(PDO::FETCH_ASSOC);
       $bi_holiday = $result_h["Holiday_pattern"];//7桁の2進数
+     
       for ($i=0; $i < 7; $i++) {
         if ($bi_holiday[$i] == '1'){//'1'のとき定休日
           switch ($i) {
@@ -71,17 +72,36 @@ try{
   }
   if($holiday_text==''){$holiday_text='定休日なし';}
   else{$holiday_text=ltrim($holiday_text,',');}//先頭に','がついているので外す
-  
+
+  //タグの取得 
+  $tagCh=array();//check済みのTag_ID入れる配列
+  $sql_tch ="SELECT * FROM Salon_has_Tag WHERE Salon_Salon_ID =".$id;
+  $stmt_tch =$dbh->query($sql_tch);
+  while($result_tch=$stmt_tch->fetch(PDO::FETCH_ASSOC)){
+    array_push($tagCh,$result_tch['Tag_Tag_ID']);
+  }
+
+  //画像のIDの取得-------------//
+  $sql_pic = "SELECT * FROM Salon_has_SalonPicture WHERE Salon_Salon_ID = ".$id;
+  $stmt_pic = $dbh->query($sql_pic);
+  $Picture_array=array();
+  while($result_pic = $stmt_pic->fetch(PDO::FETCH_ASSOC)){
+    array_push($Picture_array, $result_pic['SalonPicture_Picture_ID']);
+  }
+  if(count($Picture_array)==0){array_push($Picture_array,4);}//4はデフォルト値//なにかいれておかないと表示が崩れる
+  //-------------------------///
+
+
+ 
 //-----------------------------------------------------------------------------------------------//
 
   //美容室の名前
   echo '  <div id="salon_name">'.$result["Salon_name"]."</div>\n";
-  //美容室の写真//サロンひとつに複数のPicture_IDがあるから全部引っ張ってこんとダメ
+  //美容室の写真//
   echo '    <div id="salon_left_contents">'."\n";
-//    echo '      <img src="img_get.php?id='. $Picture_ID .'" />';
-  echo '      <img src="img_get.php?id=4" />'."\n";
-  echo '      <img src="img_get.php?id=4" />'."\n";
-  echo '      <img src="img_get.php?id=4" />'."\n";
+  for($i=0; $i < count($Picture_array); $i++){
+    echo '      <img src="../get_salon_img.php?id='.$Picture_array[$i].'" />'."\n";
+  }
   echo '    </div>'."\n";
 
 
@@ -102,9 +122,14 @@ try{
   echo '          <tr><td class="tableattribute">席数</td><td class="tablevalue">'.$result["Seats"]."</td></tr>\n";
   echo "        </table>\n";
   echo '      </div>'."\n";
-  //タグ（未実装）
+
+
+  //タグ
   echo '      <div id="salon_tag">'."\n";
-  echo '      TAG</div>'."\n";
+  for($n=0;$n<count($tagCh);$n++){
+    echo '        <img src="../get_tag_img.php?id='.$tagCh[$n].'"/>'."\n";
+  }
+  echo '      </div>'."\n";
 
   echo '    </div>'."\n";
 //--------------------------//
