@@ -90,9 +90,10 @@ try{
   $dbh = new PDO($dsn, $user, $pswd, $options);
 
  //-- 基本的な情報の登録  -------------------------------------------------------------------------------------//
-  $sql1 = "INSERT INTO Salon (Salon_name, Postcode, Prefecture_ID, Address1, Address2, TEL, Seats, Opening_hour, Fixed_holiday_ID, Introduction_title, Introduction_text, Recommend_flag) ";
+  $sql1 = "INSERT INTO Salon (Salon_name, Postcode, Prefecture_ID, Address1, Address2, TEL, Seats, Opening_hour, Fixed_holiday_ID, Introduction_title, Introduction_text, Recommend_flag, Traffic_count) ";
 
-  $sql2= "VALUES ('".$_POST['Salon_name']."','".$_POST['Postcode']."',".$_POST['Prefecture_ID'].",'".$_POST['Address1']."','".$_POST['Address2']."','".$_POST['TEL']."',".$Seats.",'".$_POST['Opening_hour']."',".$hol_int.",'".$_POST['Introduction_title']."','".$_POST['Introduction_text']."',".$rec_flag.")";
+  $sql2= "VALUES ('".htmlspecialchars($_POST['Salon_name'])."','".htmlspecialchars($_POST['Postcode'])."',".$_POST['Prefecture_ID'].",'".htmlspecialchars($_POST['Address1'])."','".htmlspecialchars($_POST['Address2'])."','".htmlspecialchars($_POST['TEL'])."',".$Seats.",'".htmlspecialchars($_POST['Opening_hour'])."',".$hol_int.",'".htmlspecialchars($_POST['Introduction_title'])."','".htmlspecialchars($_POST['Introduction_text'])."',".$rec_flag.", 0)";
+
   
   $sql = "$sql1"."$sql2";
  
@@ -122,7 +123,7 @@ try{
     $stmt_t = $dbh->query($sql_t);
     if($stmt_t==""){print_r($dbh->errorInfo());}
   }
-
+/*
   $sql = 'SELECT * FROM Salon_has_Tag';
   $stmt = $dbh->query($sql);
   if($stmt==""){print_r($dbh->errorInfo());}
@@ -130,7 +131,7 @@ try{
     print("salonID:".$result['Salon_Salon_ID']." ");
     print("tagID:".$result['Tag_Tag_ID']."<br>\n");
   }
-  
+  */
  //--------------------------------------------------------------------------------------//
 
  //--- 画像の登録 -----------------------------------------------------------------------------------//
@@ -171,7 +172,7 @@ try{
     $stmt_t = $dbh->query($sql_t);
     if($stmt_t==""){print_r($dbh->errorInfo());}
   }
-  
+ /* 
   $sql = 'SELECT * FROM Salon_has_SalonPicture';
   $stmt = $dbh->query($sql);
   if($stmt==""){print_r($dbh->errorInfo());}
@@ -179,7 +180,7 @@ try{
     print("salonID:".$result['Salon_Salon_ID']." ");
     print("PicID:".$result['SalonPicture_Picture_ID']."<br>\n");
   }
-   
+   */
  //--------------------------------------------------------------------------------------//
 
   echo '<a href="salon_view.php">美容室一覧戻る</a>';//自動で戻るようにしたほうがいいかも
