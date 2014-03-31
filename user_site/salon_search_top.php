@@ -12,6 +12,24 @@ try{
   $dbh = new PDO($dsn, $user, $pswd, $options);
   $sql_t = "SELECT * FROM Tag WHERE Tag_ID >= 2 AND Tag_ID <= 6";
   $stmt_t = $dbh->query($sql_t);
+  
+  $sql="SELECT * FROM Salon WHERE Recommend_flag = 1 ORDER BY Traffic_count DESC LIMIT 5";
+  $stmt=$dbh->query($sql);
+  $recommend_id=array();
+  $recommend_namebox=array();
+  $recommend_imgidbox=array();//4はデフォルト値
+  while($result=$stmt->fetch(PDO::FETCH_ASSOC)){
+     $sql_p = "SELECT * FROM Salon_has_SalonPicture WHERE Salon_Salon_ID = ".$result['Salon_ID'];
+     $stmt_p = $dbh->query($sql_p);
+     if($stmt_p==null){print_r($dbh->errorInfo());}
+     $result_p = $stmt_p->fetch(PDO::FETCH_ASSOC);
+     $picid = $result_p['SalonPicture_Picture_ID'];
+
+     if($picid!=""){array_push($recommend_imgidbox,$picid);}
+     else{array_push($recommend_imgidbox,4);}
+     array_push($recommend_id,$result['Salon_ID']);
+     array_push($recommend_namebox,$result['Salon_name']);
+  }
 
 }catch (PDOException $e){
   print('Error:'.$e->getMessage());
@@ -136,7 +154,14 @@ $dbh = null;
     <div id="bottom_contents">
       <p>オススメ美容室</p>
       <div id="bottom_contents_imgbox">
-      <!-- ここにはおすすめの美容室の画像リンクをならべる  -->
+      <?php
+        for($i=0;$i<count($recommend_namebox);$i++){
+          echo '        <div class="recommend_box">'."\n";
+          echo '          <div class="recommend_img"><a href="salon_detail.php?id='.$recommend_id[$i].'"><img src="../get_salon_img.php?id='.$recommend_imgidbox[$i].'" ></a></div>'."\n";
+          echo '          <div class="recommend_name">'.$recommend_namebox[$i]."</div>\n";
+          echo "        </div>\n";
+       }
+      ?>
       </div>
     </div>
 
