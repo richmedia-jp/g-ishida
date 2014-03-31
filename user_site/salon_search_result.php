@@ -14,6 +14,13 @@ try{
   $sql_t = "SELECT * FROM Tag WHERE Tag_ID >= 2 AND Tag_ID <= 6";
   $stmt_t = $dbh_t->query($sql_t);
 
+  if($_GET['local_area']!=""){
+    $sql_pref = "SELECT * FROM Prefecture WHERE Prefecture_ID = ".$_GET['local_area'];
+    $stmt_pref = $dbh_t->query($sql_pref);
+    if($stmt_pref==null){print_r($dbh_t->errorInfo());}
+    $result_pref=$stmt_pref->fetch(PDO::FETCH_ASSOC);
+  }
+
 }catch (PDOException $e){
   print('Error:'.$e->getMessage());
   die();
@@ -34,7 +41,7 @@ $dbh_t=null;
           <table>
             <tr><td>エリア</td><td>キーワード</td><td></td></tr>
             <tr>
-              <td><input type="text" name="area" value="<?php echo htmlspecialchars($_POST['area'])?>" size="10"></td>
+              <td><input type="text" name="area" value="<?php if($_GET['local_area']!=""){echo $result_pref['Prefecture_name'];}else{ echo htmlspecialchars($_POST['area']);} ?>" size="10"></td>
               <td><input type="text" name="keyword" value="<?php echo htmlspecialchars($_POST['keyword'])?>" size="40"></td>
               <td><input type="submit" value="検索"</td>
             </tr>
@@ -86,7 +93,6 @@ try{
     if($_POST['keyword']!=""){$keyword=htmlspecialchars($_POST['keyword']);}
 
 
-//新規で書いた処理
     $area_sql="";
     $key_sql="";
     $tag_sql="";
@@ -108,7 +114,7 @@ try{
     }
 
     if($keyword != null){
-      $key_sql = "(Introduction_title LIKE '%".$keyword."%' OR Introduction_text LIKE '%".$keyword."%')";
+      $key_sql = "(Salon_name LIKE '%".$keyword."%' OR Introduction_title LIKE '%".$keyword."%' OR Introduction_text LIKE '%".$keyword."%')";
     }
     
     if(isset($_POST["tag"])){//保留　中間テーブルの存在がむずい
