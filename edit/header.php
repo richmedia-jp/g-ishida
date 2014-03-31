@@ -9,7 +9,7 @@
 <div id="header">
   <div id="navmenu">
     <div class="logo">
-      <a href="salon_view.php"><img src="edit_logo.jpg" alt="ロゴ画像"></a>
+      <a href="salon_view.php">管理画面</a>
     </div>
 
     <ul>
