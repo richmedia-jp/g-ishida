@@ -90,7 +90,7 @@ if($_POST['Recommend_flag'] == 'on'){
 try{
   $dbh = new PDO($dsn, $user, $pswd, $options);
 
-  $sql = "UPDATE Salon SET Salon_name='".$_POST['Salon_name']."', Postcode='".$_POST['Postcode']."', Prefecture_ID=".$_POST['Prefecture_ID'].", Address1='".$_POST['Address1']."', Address2='".$_POST['Address2']."', TEL='".$_POST['TEL']."', Seats=".$Seats.", Opening_hour='".$_POST['Opening_hour']."', Fixed_holiday_ID=".$hol_int.", Introduction_title='".$_POST['Introduction_title']."', Introduction_text='".$_POST['Introduction_text']."', Recommend_flag=".$rec_flag." WHERE Salon_ID=".$id;
+  $sql = "UPDATE Salon SET Salon_name='".htmlspecialchars($_POST['Salon_name'])."', Postcode='".htmlspecialchars($_POST['Postcode'])."', Prefecture_ID=".$_POST['Prefecture_ID'].", Address1='".htmlspecialchars($_POST['Address1'])."', Address2='".htmlspecialchars($_POST['Address2'])."', TEL='".htmlspecialchars($_POST['TEL'])."', Seats=".$Seats.", Opening_hour='".htmlspecialchars($_POST['Opening_hour'])."', Fixed_holiday_ID=".$hol_int.", Introduction_title='".htmlspecialchars($_POST['Introduction_title'])."', Introduction_text='".htmlspecialchars($_POST['Introduction_text'])."', Recommend_flag=".$rec_flag." WHERE Salon_ID=".$id;
   
 
   $stmt = $dbh->query($sql);
@@ -121,7 +121,7 @@ try{
     if($stmt==""){print_r($dbh->errorInfo());}
   }
 
- 
+  //編集あとのタグの確認 
   $sql = 'SELECT * FROM Salon_has_Tag WHERE Salon_Salon_ID ='.$id;
   $stmt = $dbh->query($sql);
   if($stmt==""){print_r($dbh->errorInfo());}
@@ -130,8 +130,60 @@ try{
     print("tagID:".$result['Tag_Tag_ID']."<br>\n");
   }
 
+  //画像の更新
+  $sql_pic = "SELECT * FROM Salon_has_SalonPicture WHERE Salon_Salon_ID = ".$id;
+  $stmt_pic=$dbh->query($sql_pic);
+  $picid=array(0,0,0);
+  $pii=0;
+  while($result_pic=$stmt_pic->fetch(PDO::FETCH_ASSOC)){
+    $picid[$pii] = $result_pic['SalonPicture_Picture_ID'];//順番にupfile1,upfile,upfile3に該当する
+    $pii++;
+  }
 
- echo '<a href="salon_view.php">美容室一覧戻る</a>';//自動で戻るようにしたほうがいいかも
+  for($i = 1; $i <= 3; $i++){
+    $ufn="upfile".$i;
+    if ($_FILES["$ufn"]["tmp_name"]!="none"){//ファイル名の取得    
+      echo 'pic'.$i;
+      $fp = fopen($_FILES["$ufn"]["tmp_name"], "rb");//ファイルオープン
+      if(!$fp){//空なら
+       echo 'oh'.$i;
+       continue;
+      }
+      else{
+        
+        $imgdat = fread($fp, filesize($_FILES["$ufn"]["tmp_name"]));
+        fclose($fp);
+        $imgdat = addslashes($imgdat);
+        if($picid[$i-1]!=0){ 
+          $sql= "UPDATE SalonPicture SET Salon_picture='$imgdat' WHERE Picture_ID =".$picid[$i-1];
+        }
+        else{//0のときは新規登録になる 
+          $sql = "INSERT INTO SalonPicture (Salon_picture) VALUES ('$imgdat')";
+          $stmt = $dbh->query($sql);
+          if(!$stmt){print_r($dbh->errorInfo());}
+
+          //いま、上で追加したSalon_pictureのIDを取得する
+          $sql = 'SELECT * FROM SalonPicture WHERE Picture_ID IN (SELECT MAX(Picture_ID) FROM SalonPicture)';
+          $stmt = $dbh->query($sql);
+          $result = $stmt->fetch(PDO::FETCH_ASSOC);
+          $Picture_ID = $result['Picture_ID'];
+ 
+          //取得したIDをもとに中間テーブルに新規追加
+          $sql = "INSERT INTO Salon_has_SalonPicture (Salon_Salon_ID, SalonPicture_Picture_ID) VALUES (".$id.", ".$Picture_ID.")";
+ 
+        }
+        $stmt = $dbh->query($sql);
+        if(!$stmt){
+          echo 'wow'.$i;
+          print_r($dbh->errorInfo());
+        }
+        unlink($_FILES["$ufn"]["tmp_name"]);
+      }
+    }
+  }
+
+
+  echo '<a href="salon_view.php">美容室一覧戻る</a>';//自動で戻るようにしたほうがいいかも
 }catch (PDOException $e){
     print('Error:'.$e->getMessage());
     die();
