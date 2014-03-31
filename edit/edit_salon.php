@@ -24,7 +24,7 @@ try{
     die();
   }
 
-
+  //--定休日
   $hPt='0000000';//定休日をあらわす7桁の2進数
   $sql_h = "SELECT * FROM Fixed_holiday WHERE Fixed_holiday_ID = ".$result['Fixed_holiday_ID'];
   $stmt_h = $dbh->query($sql_h);
@@ -33,7 +33,7 @@ try{
     $hPt = $result_h['Holiday_pattern'];
   }
      
-
+  //--タグ
   $sql_t = "SELECT * FROM Tag WHERE (Tag_ID = 2) OR (Tag_ID = 3) OR (Tag_ID = 4) OR (Tag_ID = 5) OR (Tag_ID = 6)";
   $stmt_t = $dbh->query($sql_t);
 
@@ -44,6 +44,17 @@ try{
     array_push($tagCh,$result_tch['Tag_Tag_ID']);
   }
 //  print_r($tagCh);
+
+  //--画像
+  $sql_pic = "SELECT * FROM Salon_has_SalonPicture WHERE Salon_Salon_ID =".$id;
+  $stmt_pic = $dbh->query($sql_pic);
+  $picid_array=array(0,0,0);
+  $pi=0;
+  while($result_pic=$stmt_pic->fetch(PDO::FETCH_ASSOC)){
+    $picid_array[$pi]= $result_pic['SalonPicture_Picture_ID'];
+    $pi++;
+  }
+  
 
 
 }catch (PDOException $e){
@@ -60,10 +71,8 @@ $dbh = null;
 
   <div id="input_info">
     <p class="edit_caption">美容室 編集</p>
-    <form action="sql_edit_salon.php?id=<?php echo $id;?>" method="post"> 
-
- <!--   <form action="sql_edit_salon.php" method="post"> 
- -->     <table>
+    <form method="POST" enctype="multipart/form-data" action="sql_edit_salon.php?id=<?php echo $id;?>"> 
+      <table>
         <tr>
           <td>美容室名</td> <td><input type="text" name="Salon_name" size="30" class="input_form" value="<?php echo $result['Salon_name'];?>"></td>
         </tr>
@@ -145,6 +154,21 @@ $dbh = null;
         }
 ?>
       </table>   
+
+ 
+      <table>
+        <?php
+        for ($i=0; $i<3;$i++){
+          echo "        <tr>\n";
+          echo "          <td>新しい画像ファイルを選択して下さい</td>\n";
+          echo '          <td><input type="file" size="50" name="upfile'.($i+1).'"></td>'."\n";
+          if($picid_array[$i]!=0){echo '        <td><img src="get_salon_img.php?id='.$picid_array[$i].'"/></td>'."\n";}
+
+          echo "        </tr>\n";
+        }
+        ?>
+      </table>
+ 
 
 
       <!-- あと画像のアップロードと公開・非公開設定のチェックボックスを入れる  -->
