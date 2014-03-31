@@ -14,6 +14,24 @@ try{
      echo 'CONNECT MISS<br>';
   }
 
+//--アクセスカウントアップ -----------------------------------//
+  $sql = "SELECT * FROM Salon WHERE Salon_ID =".$id;
+  $stmt = $dbh->query($sql);
+  $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+  if($result['Traffic_count']==null){//保険。最初に美容師データを作った時点で、nullではなくを0を入れてる
+    $sql = "UPDATE Salon SET Traffic_count = 1 WHERE Salon_ID=".$id;
+    $stmt= $dbh->query($sql);
+    if(!$stmt){print_r($dbh->errorInfo());}
+  }
+  else{
+    $sql = "UPDATE Salon SET Traffic_count = Traffic_count + 1 WHERE Salon_ID=".$id;
+    $stmt= $dbh->query($sql);
+    if(!$stmt){print_r($dbh->errorInfo());}
+  }
+//-------------------------------------------------------------// 
+
+
 //--- 情報の取得 -----------------------------------------------------------//
   //基本的な情報の取得
   $sql = "SELECT * FROM Salon WHERE Salon_ID = ".$id;
@@ -22,10 +40,11 @@ try{
   //都道府県名の取得
   $Prefecture_name = '';//都道府県名
   $sql_prefecture = "SELECT * FROM Prefecture WHERE Prefecture_ID = ".$result["Prefecture_ID"];
-  if($result["Prefecture"]!=null){
+  if($result["Prefecture_ID"]!=null){
     $stmt_p = $dbh->query($sql_prefecture);
     $result_p = $stmt_p->fetch(PDO::FETCH_ASSOC);
     $Prefecture_name = $result_p["Prefecture_name"];
+    
   }
   //定休日の取得
   $holiday_text = '';//定休日についての文言をいれる変数
@@ -133,6 +152,7 @@ try{
 
   echo '    </div>'."\n";
 //--------------------------//
+
 
 }catch (PDOException $e){
   print('Error:'.$e->getMessage());
